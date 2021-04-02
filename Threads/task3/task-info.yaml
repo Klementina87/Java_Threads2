@@ -1,0 +1,301 @@
+type: edu
+files:
+- name: src/Task.java
+  visible: true
+  text: |-
+    public class Task {
+      public static void main(String[] args){
+          WebPageEditor wpe = new WebPageEditor("index.html");
+          System.out.println("Write whatever you want. Type quit to finish.");
+          System.out.println("Whatever you have entered so far will be saved periodically");
+          System.out.println("To add a title, prefix the line with t:  (e.g. t:Chapter 1 )");
+          System.out.println("You can always view the formatted text by clicking on index.html in the root directory of this project.");
+          wpe.start();
+      }
+    }
+  learner_created: false
+- name: test/Tests.java
+  visible: false
+  text: |-
+    import org.junit.Assert;
+    import org.junit.Rule;
+    import org.junit.Test;
+    import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
+
+    import java.io.ByteArrayInputStream;
+    import java.io.File;
+    import java.util.LinkedList;
+
+    public class Tests {
+      @Rule
+      public TextFromStandardInputStream txt = TextFromStandardInputStream.emptyStandardInputStream();
+
+      @Test
+      public void testWebPage() {
+        WebPage wp = new WebPage();
+        Assert.assertTrue("Is your dom a LinkedList?",wp.dom instanceof LinkedList);
+        wp.addTitle("T1");
+        Assert.assertTrue("Is your title adding the right tags in the right place, with no spaces?",wp.dom.get(0).equalsIgnoreCase("<h1>t1</h1>"));
+        wp.addParagraph("p1");
+        Assert.assertTrue("Are you adding new elements (paragraps and titles as new elements in the dom?",wp.dom.size()==2);
+        Assert.assertTrue("Is your addParagraph adding the right tags next to the text (no spaces)?",wp.dom.get(1).equalsIgnoreCase("<p>p1</p>"));
+        Assert.assertTrue("Is your toString flattening the dom into one big string?",wp.toString().contains("T1") && wp.toString().contains("p1") && wp.toString().contains("body"));
+        wp.save("deleteme.html");
+        File f = new File("deleteme.html");
+        Assert.assertTrue("Are you saving to a file with an arbitrary given name?",f.exists());
+      }
+
+      @Test
+      public void testWebPageEditor(){
+        WebPageEditor wpe = new WebPageEditor("first.html");
+        txt.provideLines("t:t1","first para","second para");
+        Thread t = new Thread(()-> {wpe.start();});
+        t.start();
+        Assert.assertTrue("Are you spanning at least two threads?",4<Thread.activeCount());
+        try {
+          t.sleep(11000L);
+          txt.provideLines("quit");
+          System.out.println(wpe);
+        }catch(Exception e){
+          Assert.fail("Something is wrong with the threads:"+e.getMessage());
+        }
+
+
+      }
+
+
+    }
+  learner_created: false
+- name: src/WebPage.java
+  visible: true
+  placeholders:
+  - offset: 0
+    length: 55
+    placeholder_text: |-
+      /* TODO
+      Imports will be filling up as you need them. */
+    initial_state:
+      length: 55
+      offset: 0
+    initialized_from_dependency: false
+    selected: false
+    status: Solved
+    encrypted_possible_answer: |-
+      import java.io.File;
+      import java.io.FileWriter;
+      import java.io.IOException;
+      import java.util.LinkedList;
+      import java.util.List;
+  - offset: 351
+    length: 47
+    placeholder_text: "/* TODO \nInitialize this to some kind of List */"
+    initial_state:
+      length: 48
+      offset: 192
+    initialized_from_dependency: false
+    selected: false
+    status: Solved
+    encrypted_possible_answer: new LinkedList<String>()
+  - offset: 498
+    length: 33
+    placeholder_text: "/* TODO \nAdd a title to the DOM*/"
+    initial_state:
+      length: 33
+      offset: 297
+    initialized_from_dependency: false
+    selected: true
+    status: Solved
+    encrypted_possible_answer: dom.add("<h1>"+title+"</h1>");
+  - offset: 543
+    length: 105
+    placeholder_text: "/* TODO \nimplement addParagraph that receives a String and\
+      \ puts it in the dom \nsurrounded by <p> and </p>*/"
+    initial_state:
+      length: 107
+      offset: 342
+    initialized_from_dependency: false
+    selected: true
+    status: Solved
+    encrypted_possible_answer: |
+      public void addParagraph(String paragraph){
+              dom.add("<p>"+paragraph+"</p>");
+          }
+  - offset: 894
+    length: 72
+    placeholder_text: |-
+      /* TODO
+      Loop through the elemments of the dom and append them to html */
+    initial_state:
+      length: 72
+      offset: 545
+    initialized_from_dependency: false
+    selected: true
+    status: Solved
+    encrypted_possible_answer: |-
+      for(String e:dom){
+                  html=html+e+"\n";
+              }
+  - offset: 1535
+    length: 81
+    placeholder_text: "/* TODO \nSave a string representation of this webpage to the\
+      \ filename provided.*/"
+    initial_state:
+      length: 81
+      offset: 712
+    initialized_from_dependency: false
+    selected: false
+    status: Solved
+    encrypted_possible_answer: |-
+      try(FileWriter out = new FileWriter(new File(filename))){
+                  out.write(this.toString());
+              }catch(IOException e) {
+                  e.printStackTrace();
+              }
+  text: "/* TODO\nImports will be filling up as you need them. */\n\npublic class\
+    \ WebPage {\n    public List<String> dom; // this actually has the html document\
+    \ model.\n\n    public WebPage(){\n        dom = /* TODO \nInitialize this to\
+    \ some kind of List */;\n    }\n\n    public void addTitle(String title){\n  \
+    \      /* TODO \nAdd a title to the DOM*/\n    }\n\n    /* TODO \nimplement addParagraph\
+    \ that receives a String and puts it in the dom \nsurrounded by <p> and </p>*/\n\
+    \    public String toString(){\n        String html = \"<html>\\n<head>\\n</head>\\\
+    n<body>\";\n        /* TODO\nLoop through the elemments of the dom and append\
+    \ them to html */\n        return html+\"</body>\\n</html>\";\n    }\n\n    public\
+    \ void save(String filename){\n        /* TODO \nSave a string representation\
+    \ of this webpage to the filename provided.*/\n    }\n}\n"
+  learner_created: false
+- name: src/WebPageEditor.java
+  visible: true
+  placeholders:
+  - offset: 0
+    length: 50
+    placeholder_text: "/* TODO \nImports. Fill them up as you need them.*/"
+    initial_state:
+      length: 50
+      offset: 0
+    initialized_from_dependency: false
+    selected: false
+    status: Solved
+    encrypted_possible_answer: |-
+      import java.util.Scanner;
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.ScheduledExecutorService;
+      import java.util.concurrent.TimeUnit;
+  - offset: 622
+    length: 80
+    placeholder_text: |-
+      /* TODO
+      Initialize wp to an empty webpage, and filename to the value passed. */
+    initial_state:
+      length: 79
+      offset: 307
+    initialized_from_dependency: false
+    selected: false
+    status: Solved
+    encrypted_possible_answer: |2-
+              this.wp = new WebPage();
+              this.filename = filename;
+  - offset: 929
+    length: 85
+    placeholder_text: |-
+      /* TODO
+      Using Executors, instantiate a new SingleThreadedScheduledExecutor */
+    initial_state:
+      length: 77
+      offset: 463
+    initialized_from_dependency: false
+    selected: true
+    status: Solved
+    encrypted_possible_answer: Executors.newSingleThreadScheduledExecutor();
+  - offset: 1023
+    length: 192
+    placeholder_text: "/* TODO \nSchedule at a fixed rate a runnable that executes\
+      \ checkSave. if checkSave is true it will print \"Saved\", This has to be schdule\
+      \ to start in 10 seconds and repeat every 10 seconds.  */"
+    initial_state:
+      length: 192
+      offset: 549
+    initialized_from_dependency: false
+    selected: false
+    status: Solved
+    encrypted_possible_answer: |-
+      service.scheduleAtFixedRate(()->{
+                  if (checkSave())
+                      System.out.println("...Saved");
+              },10L,10L, TimeUnit.SECONDS);
+  - offset: 1811
+    length: 139
+    placeholder_text: "/* TODO \nIf the user types \"quit\" the loop ends. If the\
+      \ input starts with t: you add a title to the webpage. If not, you add a paragraph.*/"
+    initial_state:
+      length: 139
+      offset: 906
+    initialized_from_dependency: false
+    selected: false
+    status: Solved
+    encrypted_possible_answer: |2-
+                  String text = kbd.nextLine();
+                  if(text.equals("quit"))
+                      finish=true;
+                  else if (text.startsWith("t:"))
+                      wp.addTitle(text.substring(2));
+                  else
+                      wp.addParagraph(text);
+  - offset: 1978
+    length: 48
+    placeholder_text: "/* TODO \nShutdown the threads NOW*/"
+    initial_state:
+      length: 35
+      offset: 1072
+    initialized_from_dependency: false
+    selected: true
+    status: Solved
+    encrypted_possible_answer: shutdownNow()
+  - offset: 2297
+    length: 286
+    placeholder_text: "/* TODO \nIf the text of the wp (String representation) is\
+      \ equal to the last String reperesentation (stored in tmp) returns false. Otherwise,\
+      \ it saves the webpage to the given filenam, tmp updates to the most current\
+      \ string representation of this webpage, and the funtion returns true.*/"
+    initial_state:
+      length: 286
+      offset: 1204
+    initialized_from_dependency: false
+    selected: false
+    status: Solved
+    encrypted_possible_answer: |-
+      if(this.wp.toString().equals(this.temp))
+                  return false;
+              else{
+                  wp.save(filename);
+                  temp = wp.toString();
+                  return true;
+              }
+  text: "/* TODO \nImports. Fill them up as you need them.*/\n\npublic class WebPageEditor\
+    \ {\n    public  String temp; // holds the last webpage saved.\n    public  WebPage\
+    \ wp; // the webpage you are working on\n    public  String filename; // the filename\
+    \ to save this webpage\n\n    public WebPageEditor(String filename){\n/* TODO\n\
+    Initialize wp to an empty webpage, and filename to the value passed. */\n    }\n\
+    \n    public void start(){\n\n        ScheduledExecutorService service = /* TODO\n\
+    Using Executors, instantiate a new SingleThreadedScheduledExecutor */\n      \
+    \  /* TODO \nSchedule at a fixed rate a runnable that executes checkSave. if checkSave\
+    \ is true it will print \"Saved\", This has to be schdule to start in 10 seconds\
+    \ and repeat every 10 seconds.  */\n\n        // use a scanner to read every line\
+    \ the user writes\n        Scanner kbd  = new Scanner(System.in);\n        boolean\
+    \ finish = false;\n        while(!finish){\n/* TODO \nIf the user types \"quit\"\
+    \ the loop ends. If the input starts with t: you add a title to the webpage. If\
+    \ not, you add a paragraph.*/\n        }\n        service./* TODO \nShutdown the\
+    \ threads NOW*/; // when the loop finishes, threads are stopped\n    }\n\n   \
+    \ public  boolean checkSave(){\n        /* TODO \nIf the text of the wp (String\
+    \ representation) is equal to the last String reperesentation (stored in tmp)\
+    \ returns false. Otherwise, it saves the webpage to the given filenam, tmp updates\
+    \ to the most current string representation of this webpage, and the funtion returns\
+    \ true.*/\n    }\n}\n"
+  learner_created: false
+- name: deleteme.html
+  visible: true
+  learner_created: true
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Mon, 29 Mar 2021 18:04:18 UTC
+record: -1
